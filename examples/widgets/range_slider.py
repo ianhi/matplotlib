@@ -9,8 +9,8 @@ The RangeSlider widget can be used similarly to the `.widgets.Slider`
 widget. The major difference is that RangeSlider's ``val`` attribute
 is a tuple of floats ``(lower val, upper val)`` rather than a single float.
 
-See :doc:`/gallery/widgets/slider_demo` for an example of using
-a ``Slider`` to control a single float.
+See :doc:`/gallery/widgets/slider_styling` for customizing and styling Sliders
+as well as snapping Sliders to discrete values
 
 See :doc:`/gallery/widgets/slider_snap_demo` for an example of having
 the ``Slider`` snap to discrete values.
