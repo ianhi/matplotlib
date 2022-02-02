@@ -281,8 +281,8 @@ class SliderBase(AxesWidget):
     def _stepped_value(self, val):
         """Return *val* coerced to closest number in the ``valstep`` grid."""
         if isinstance(self.valstep, Number):
-            val = (self.valmin
-                   + round((val - self.valmin) / self.valstep) * self.valstep)
+            val = (self._valmin
+                   + round((val - self._valmin) / self.valstep) * self.valstep)
         elif self.valstep is not None:
             valstep = np.asanyarray(self.valstep)
             if valstep.ndim != 1:
@@ -308,18 +308,32 @@ class SliderBase(AxesWidget):
         if np.any(self.val != self.valinit):
             self.set_val(self.valinit)
 
-    def set_limits(self, vmin=None, vmax=None):
-        """Update the limits of the slider."""
-        if vmin is None and vmax is None:
+    def _value_in_bounds(self, value):
+        raise NotImplementedError
+
+    def set_limits(self, valmin=None, valmax=None):
+        """
+        Update the limits of the slider.
+
+        Parameters
+        ----------
+        valmin, valmax : float, optional
+            The new values of the slider limits.
+        """
+        if valmin is None and valmax is None:
             return
-        if vmin is not None:
-            self.valmin = vmin
-        if vmax is not None:
-            self.valmax = vmax
+        if valmin is not None:
+            if not isinstance(valmin, Number):
+                raise TypeError(
+                    f"valmin must be a number but got type: {type(valmin)}"
+                )
+            self._valmin = valmin
+        if valmin is not None:
+            self.valmax = valmax
         if self.orientation == 'vertical':
-            self.ax.set_ylim((self.valmin, self.valmax))
+            self.ax.set_ylim((self._valmin, self._valmax))
         else:
-            self.ax.set_xlim((self.valmin, self.valmax))
+            self.ax.set_xlim((self._valmin, self._valmax))
 
 
 class Slider(SliderBase):
@@ -435,7 +449,7 @@ class Slider(SliderBase):
         self.slidermax = slidermax
         valinit = self._value_in_bounds(valinit)
         if valinit is None:
-            valinit = valmin
+            valinit = self._valmin
         self.val = valinit
         self.valinit = valinit
 
@@ -465,7 +479,7 @@ class Slider(SliderBase):
                 facecolor=track_color
             )
             ax.add_patch(self.track)
-            self.poly = ax.axvspan(valmin, valinit, .25, .75, **kwargs)
+            self.poly = ax.axvspan(self._valmin, valinit, .25, .75, **kwargs)
             self.vline = ax.axvline(valinit, 0, 1, color=initcolor, lw=1,
                                     clip_path=TransformedPatchPath(self.track))
             handleXY = [[valinit], [0.5]]
@@ -501,10 +515,10 @@ class Slider(SliderBase):
         """Makes sure *val* is with given bounds."""
         val = self._stepped_value(val)
 
-        if val <= self.valmin:
+        if val <= self._valmin:
             if not self.closedmin:
                 return
-            val = self.valmin
+            val = self._valmin
         elif val >= self.valmax:
             if not self.closedmax:
                 return
@@ -551,7 +565,7 @@ class Slider(SliderBase):
         if self.valfmt is not None:
             return self.valfmt % val
         else:
-            _, s, _ = self._fmt.format_ticks([self.valmin, val, self.valmax])
+            _, s, _ = self._fmt.format_ticks([self._valmin, val, self._valmax])
             # fmt.get_offset is actually the multiplicative factor, if any.
             return s + self._fmt.get_offset()
 
@@ -596,18 +610,6 @@ class Slider(SliderBase):
             Connection id (which can be used to disconnect *func*).
         """
         return self._observers.connect('changed', lambda val: func(val))
-
-    def set_limits(self, vmin=None, vmax=None):
-        """Update the limits of the slider."""
-        super().set_limits(vmin=vmin, vmax=vmax)
-        self.val = self._value_in_bounds(self.val)
-        # if we reset the slider after updating the limits then we should have
-        # the proper valinit value
-        self.valinit = self._value_in_bounds(self.valinit)
-        if self.orientation == 'vertical':
-            self.hline.set_ydata(self.valinit)
-        else:
-            self.vline.set_xdata(self.valinit)
 
 
 class RangeSlider(SliderBase):
@@ -710,12 +712,12 @@ class RangeSlider(SliderBase):
                          valmin, valmax, valfmt, dragging, valstep)
 
         # Set a value to allow _value_in_bounds() to work.
-        self.val = [valmin, valmax]
+        self.val = [self._valmin, self._valmax]
         if valinit is None:
             # Place at the 25th and 75th percentiles
-            extent = valmax - valmin
-            valinit = np.array([valmin + extent * 0.25,
-                                valmin + extent * 0.75])
+            extent = self._valmax - self._valmin
+            valinit = np.array([self._valmin + extent * 0.25,
+                                self._valmin + extent * 0.75])
         else:
             valinit = self._value_in_bounds(valinit)
         self.val = valinit
@@ -804,10 +806,10 @@ class RangeSlider(SliderBase):
 
     def _min_in_bounds(self, min):
         """Ensure the new min value is between valmin and self.val[1]."""
-        if min <= self.valmin:
+        if min <= self._valmin:
             if not self.closedmin:
                 return self.val[0]
-            min = self.valmin
+            min = self._valmin
 
         if min > self.val[1]:
             min = self.val[1]
@@ -882,7 +884,7 @@ class RangeSlider(SliderBase):
             return f"({self.valfmt % val[0]}, {self.valfmt % val[1]})"
         else:
             _, s1, s2, _ = self._fmt.format_ticks(
-                [self.valmin, *val, self.valmax]
+                [self._valmin, *val, self._valmax]
             )
             # fmt.get_offset is actually the multiplicative factor, if any.
             s1 += self._fmt.get_offset()
