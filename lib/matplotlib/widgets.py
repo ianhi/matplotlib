@@ -249,8 +249,8 @@ class SliderBase(AxesWidget):
         self.orientation = orientation
         self.closedmin = closedmin
         self.closedmax = closedmax
-        self.valmin = valmin
-        self.valmax = valmax
+        self._valmin = valmin
+        self._valmax = valmax
         self.valstep = valstep
         self.drag_active = False
         self.valfmt = valfmt
@@ -311,6 +311,22 @@ class SliderBase(AxesWidget):
     def _value_in_bounds(self, value):
         raise NotImplementedError
 
+    @property
+    def valmin(self):
+        return self._valmin
+
+    @valmin.setter
+    def valmin(self, value):
+        self.set_limits(valmin=value)
+
+    @property
+    def valmax(self):
+        return self._valmax
+
+    @valmax.setter
+    def valmax(self, value):
+        self.set_limits(valmax=value)
+
     def set_limits(self, valmin=None, valmax=None):
         """
         Update the limits of the slider.
@@ -323,13 +339,18 @@ class SliderBase(AxesWidget):
         if valmin is None and valmax is None:
             return
         if valmin is not None:
+            print(type(valmin))
             if not isinstance(valmin, Number):
                 raise TypeError(
                     f"valmin must be a number but got type: {type(valmin)}"
                 )
             self._valmin = valmin
-        if valmin is not None:
-            self.valmax = valmax
+        if valmax is not None:
+            if not isinstance(valmax, Number):
+                raise TypeError(
+                    f"valmax must be a number but got type: {type(valmax)}"
+                )
+            self._valmax = valmax
         if self.orientation == 'vertical':
             self.ax.set_ylim((self._valmin, self._valmax))
         else:
@@ -466,7 +487,7 @@ class Slider(SliderBase):
                 facecolor=track_color
             )
             ax.add_patch(self.track)
-            self.poly = ax.axhspan(valmin, valinit, .25, .75, **kwargs)
+            self.poly = ax.axhspan(self._valmin, valinit, .25, .75, **kwargs)
             # Drawing a longer line and clipping it to the track avoids
             # pixellization-related asymmetries.
             self.hline = ax.axhline(valinit, 0, 1, color=initcolor, lw=1,

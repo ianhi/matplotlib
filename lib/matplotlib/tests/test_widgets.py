@@ -1086,6 +1086,11 @@ def test_slider_set_limits():
     assert slider.valmax == 40
     assert slider.valmin == 10
 
+    with pytest.raises(TypeError):
+        slider.valmin = 'wrong'
+    with pytest.raises(TypeError):
+        slider.valmax = 'wrong'
+
 
 def test_slider_valstep_snapping():
     fig, ax = plt.subplots()
