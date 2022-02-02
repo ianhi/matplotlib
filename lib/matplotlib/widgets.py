@@ -329,7 +329,8 @@ class SliderBase(AxesWidget):
 
     def set_limits(self, valmin=None, valmax=None):
         """
-        Update the limits of the slider.
+        Update the limits of the slider. If the current value is
+        outside of the new limits then the value will be changed.
 
         Parameters
         ----------
@@ -355,6 +356,11 @@ class SliderBase(AxesWidget):
             self.ax.set_ylim((self._valmin, self._valmax))
         else:
             self.ax.set_xlim((self._valmin, self._valmax))
+
+        # Ensure slider is within the limits
+        new_val = self._value_in_bounds(self.val)
+        if not np.array_equal(new_val, self.val):
+            self.set_val(new_val)
 
 
 class Slider(SliderBase):

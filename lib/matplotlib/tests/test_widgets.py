@@ -1066,7 +1066,7 @@ def test_slider_set_limits():
 
     slider = widgets.Slider(ax=ax, label='', valmin=10.0, valmax=40.0,
                             valinit=15.0)
-    slider.val = 20
+    slider.set_val(20)
     slider.set_limits(valmin=30, valmax=50)
     assert slider.val == 30
     assert slider.valmax == 50
@@ -1074,7 +1074,7 @@ def test_slider_set_limits():
 
     slider = widgets.Slider(ax=ax, label='', valmin=10.0, valmax=40.0,
                             valinit=15.0)
-    slider.val = 20
+    slider.set_val(20)
     slider.set_limits(valmin=1, valmax=7)
     assert slider.val == 7
     assert slider.valmax == 7
