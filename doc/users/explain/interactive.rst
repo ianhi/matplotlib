@@ -21,7 +21,7 @@ Matplotlib ships with :ref:`backends <what-is-a-backend>` binding to
 several GUI toolkits (Qt, Tk, Wx, GTK, macOS, JavaScript) and third party
 packages provide bindings to `kivy
 <https://github.com/kivy-garden/garden.matplotlib>`__ and `Jupyter Lab
-<https://matplotlib.org/ipympl>`__.  For the figures to be responsive to
+<https://matplotlib.org/>`__.  For the figures to be responsive to
 mouse, keyboard, and paint events, the GUI event loop needs to be integrated
 with an interactive prompt. We recommend using IPython (see :ref:`below <ipython-pylab>`).
 
@@ -269,7 +269,7 @@ Jupyter Notebooks / JupyterLab
    cells.
 
 To get interactive figures in the 'classic' notebook or Jupyter lab,
-use the `ipympl <https://github.com/matplotlib/ipympl>`__ backend
+use the `ipympl <https://matplotlib.org/ipympl>`__ backend
 (must be installed separately) which uses the **ipywidget** framework.
 If ``ipympl`` is installed use the magic:
 
