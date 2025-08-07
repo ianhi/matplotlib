@@ -39,7 +39,9 @@ py_mod = import('python')
 py3 = py_mod.find_installation(pure: false)
 py3_dep = py3.dependency()
 
-pybind11_dep = dependency('pybind11', version: '>=2.13.2')
+# Find pybind11 directly using Python instead of pkg-config
+pybind11_incl = run_command(py3, '-c', 'import pybind11; print(pybind11.get_include())', check: true).stdout().strip()
+pybind11_dep = declare_dependency(compile_args: ['-I' + pybind11_incl])
 
 subdir('extern')
 subdir('src')
