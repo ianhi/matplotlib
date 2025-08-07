@@ -1,0 +1,108 @@
+[project]
+name = "matplotlib"
+version = "3.11.0.dev0"
+description = "Python plotting package"
+authors = ["The Matplotlib development team"]
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "linux-64", "win-64"]
+
+[dependencies]
+# Build dependencies
+python = ">=3.11"
+compilers = ">=1.7.0,<2"
+pkg-config = ">=0.29.2,<0.30"
+ninja = ">=1.12.1,<2"
+meson = ">=1.7.1,<2"
+meson-python = ">=0.13.1,!=0.17.*"
+pybind11 = ">=2.13.2,!=2.13.3"
+pybind11-global = ">=2.13.2,!=2.13.3"
+setuptools_scm = ">=7"
+setuptools = ">=64"
+ccache = ">=4.10.1,<5"
+pip = "*"
+
+# Runtime dependencies from pyproject.toml
+numpy = ">=1.25"
+contourpy = ">=1.0.1"
+cycler = ">=0.10"
+fonttools = ">=4.22.0"
+kiwisolver = ">=1.3.1"
+pillow = ">=9"
+pyparsing = ">=3"
+python-dateutil = ">=2.7"
+packaging = ">=20.0"
+
+# Additional development dependencies from environment.yml
+cairocffi = "*"
+pygobject = "*"
+pyqt = "*"
+tornado = "*"
+ipython = "*"
+
+[tasks]
+# Build tasks
+build = { cmd = "python -m pip install -e . --no-build-isolation -v", env = { CC = "ccache $CC", CXX = "ccache $CXX", CPPFLAGS = "-I$PIXI_ENVIRONMENT_ROOT/include", CFLAGS = "-I$PIXI_ENVIRONMENT_ROOT/include" } }
+build-clean = { cmd = "rm -rf build/ && python -m pip install -e . --no-build-isolation -v", env = { CC = "ccache $CC", CXX = "ccache $CXX", CPPFLAGS = "-I$PIXI_ENVIRONMENT_ROOT/include", CFLAGS = "-I$PIXI_ENVIRONMENT_ROOT/include" } }
+wheel = { cmd = "python -m build --wheel --no-isolation", env = { CC = "ccache $CC", CXX = "ccache $CXX", CPPFLAGS = "-I$PIXI_ENVIRONMENT_ROOT/include", CFLAGS = "-I$PIXI_ENVIRONMENT_ROOT/include" } }
+
+# Development tasks
+ipython = { cmd = "ipython", depends-on = ["build"] }
+python = { cmd = "python", depends-on = ["build"] }
+
+[feature.test.dependencies]
+pytest = "*"
+pytest-cov = "*"
+pytest-rerunfailures = "*"
+pytest-timeout = "*"
+pytest-xdist = "*"
+coverage = "*"
+
+[feature.test.tasks]
+test = { cmd = "python -m pytest", depends-on = ["build"] }
+test-fast = { cmd = "python -m pytest -x -v", depends-on = ["build"] }
+test-backends = { cmd = "python -m pytest lib/matplotlib/tests/test_backends_interactive.py", depends-on = ["build"] }
+
+[feature.lint.dependencies]
+ruff = "*"
+pre-commit = "*"
+
+[feature.lint.tasks]
+lint = "ruff check ."
+lint-fix = "ruff check --fix ."
+format = "ruff format ."
+
+[feature.docs.dependencies]
+sphinx = ">=3.0.0,!=6.1.2"
+sphinx-copybutton = "*"
+sphinx-gallery = ">=0.12.0"
+sphinx-design = "*"
+numpydoc = ">=1.0"
+pydata-sphinx-theme = "~=0.15.0"
+ipywidgets = "*"
+graphviz = "*"
+colorspacious = "*"
+joblib = "*"
+pystemmer = "*"
+pyyaml = "*"
+
+[feature.docs.pypi-dependencies]
+mpl-sphinx-theme = "~=3.8.0"
+sphinxcontrib-svg2pdfconverter = ">=1.1.0"
+sphinxcontrib-video = ">=0.2.1"
+pikepdf = "*"
+
+[feature.docs.tasks]
+docs = { cmd = "cd doc && make html", depends-on = ["build"] }
+docs-clean = { cmd = "cd doc && make clean && make html", depends-on = ["build"] }
+
+[feature.dev.dependencies]
+# Include common development tools
+black = "<24"
+pydocstyle = ">=5.1.0"
+
+[environments]
+default = ["test", "lint"]
+test = ["test"]
+lint = ["lint"]
+docs = ["docs"]
+dev = ["test", "lint", "dev"]
