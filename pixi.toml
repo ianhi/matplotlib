@@ -41,13 +41,15 @@ ipython = "*"
 
 [tasks]
 # Build tasks
-build = { cmd = "python -m pip install -e . --no-build-isolation -v", env = { CC = "ccache $CC", CXX = "ccache $CXX", CPPFLAGS = "-I$PIXI_ENVIRONMENT_ROOT/include", CFLAGS = "-I$PIXI_ENVIRONMENT_ROOT/include" } }
-build-clean = { cmd = "rm -rf build/ && python -m pip install -e . --no-build-isolation -v", env = { CC = "ccache $CC", CXX = "ccache $CXX", CPPFLAGS = "-I$PIXI_ENVIRONMENT_ROOT/include", CFLAGS = "-I$PIXI_ENVIRONMENT_ROOT/include" } }
-wheel = { cmd = "python -m build --wheel --no-isolation", env = { CC = "ccache $CC", CXX = "ccache $CXX", CPPFLAGS = "-I$PIXI_ENVIRONMENT_ROOT/include", CFLAGS = "-I$PIXI_ENVIRONMENT_ROOT/include" } }
+build = { cmd = "python -m pip install -e . --no-build-isolation -v", env = { CC = "ccache $CC", CXX = "ccache $CXX", PKG_CONFIG_PATH = "$PIXI_ENVIRONMENT_ROOT/share/pkgconfig:$PIXI_ENVIRONMENT_ROOT/lib/pkgconfig" } }
+build-clean = { cmd = "rm -rf build/ && python -m pip install -e . --no-build-isolation -v", env = { CC = "ccache $CC", CXX = "ccache $CXX", PKG_CONFIG_PATH = "$PIXI_ENVIRONMENT_ROOT/share/pkgconfig:$PIXI_ENVIRONMENT_ROOT/lib/pkgconfig" } }
+wheel = { cmd = "python -m build --wheel --no-isolation", env = { CC = "ccache $CC", CXX = "ccache $CXX", PKG_CONFIG_PATH = "$PIXI_ENVIRONMENT_ROOT/share/pkgconfig:$PIXI_ENVIRONMENT_ROOT/lib/pkgconfig" } }
 
 # Development tasks
 ipython = { cmd = "ipython", depends-on = ["build"] }
 python = { cmd = "python", depends-on = ["build"] }
+check-env = { cmd = "python -c \"import os; print('PKG_CONFIG_PATH:', os.environ.get('PKG_CONFIG_PATH', 'NOT SET'))\"" }
+test-import = { cmd = "python -c \"import matplotlib; print('Build successful'); print('Version:', matplotlib.__version__)\"", depends-on = ["build"] }
 
 [feature.test.dependencies]
 pytest = "*"
