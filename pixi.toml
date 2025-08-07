@@ -30,6 +30,7 @@ packaging = ">=20.0"
 
 # Development tools
 ipython = "*"
+tornado = ">=6.5.1,<7"
 
 [tasks]
 build = { cmd = "python -m pip install -e . --no-build-isolation -v", env = { CC = "ccache $CC", CXX = "ccache $CXX" } }
